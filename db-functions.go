@@ -8,23 +8,6 @@ import (
 	_ "github.com/microsoft/go-mssqldb"
 )
 
-type stockPrice struct {
-	Ticker       string
-	Date         string
-	Volume       int64
-	Open         float64
-	Close        float64
-	High         float64
-	Low          float64
-	Transactions int64
-}
-
-type QueryParam struct {
-	Ticker     string
-	End_date   string
-	Start_date string
-}
-
 var server = "sec-filings-server.database.windows.net"
 var port = 1433
 var user = "SEC_admin"
@@ -51,7 +34,7 @@ func CreateConn() (*sql.DB, error) {
 
 }
 
-func readStockPrices(queryparam QueryParam, db *sql.DB) ([]stockPrice, error) {
+func readStockPrices(queryparam QueryParamDate, db *sql.DB) ([]stockPrice, error) {
 
 	ctx := context.Background()
 	err := db.PingContext(ctx)
@@ -91,5 +74,43 @@ func readStockPrices(queryparam QueryParam, db *sql.DB) ([]stockPrice, error) {
 		stockPrices = append(stockPrices, candidate)
 	}
 	return stockPrices, nil
+
+}
+
+func readCompany(inputcomp company, db *sql.DB) (company, error) {
+	ctx := context.Background()
+	err := db.PingContext(ctx)
+
+	var tsql string
+
+	if err != nil {
+		return company{}, err
+	}
+	if inputcomp.Ticker == "" && inputcomp.cik == 0 {
+		return company{}, errors.New("No ticker or cik provided")
+	}
+	if inputcomp.cik != 0 {
+		tsql = fmt.Sprintf("SELECT TOP 1 cik, ticker, title FROM companies WHERE cik = %d", inputcomp.cik)
+	}
+	if inputcomp.Ticker != "" {
+		tsql = fmt.Sprintf("SELECT TOP 1 cik, ticker, title FROM companies WHERE ticker = '%s'", inputcomp.Ticker)
+	}
+	rows, queryerr := db.QueryContext(ctx, tsql)
+
+	if queryerr != nil {
+		return company{}, queryerr
+	}
+
+	defer rows.Close()
+
+	returncomp := company{}
+
+	if rows.Next() {
+		err := rows.Scan(&returncomp.cik, &returncomp.Ticker, &returncomp.Title)
+		if err != nil {
+			return company{}, err
+		}
+	}
+	return returncomp, nil
 
 }
