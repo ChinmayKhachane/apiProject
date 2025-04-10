@@ -87,11 +87,11 @@ func readCompany(inputcomp company, db *sql.DB) (company, error) {
 	if err != nil {
 		return company{}, err
 	}
-	if inputcomp.Ticker == "" && inputcomp.cik == 0 {
+	if inputcomp.Ticker == "" && inputcomp.Cik == 0 {
 		return company{}, errors.New("No ticker or cik provided")
 	}
-	if inputcomp.cik != 0 {
-		tsql = fmt.Sprintf("SELECT TOP 1 cik, ticker, title FROM companies WHERE cik = %d", inputcomp.cik)
+	if inputcomp.Cik != 0 {
+		tsql = fmt.Sprintf("SELECT TOP 1 cik, ticker, title FROM companies WHERE cik = %d", inputcomp.Cik)
 	}
 	if inputcomp.Ticker != "" {
 		tsql = fmt.Sprintf("SELECT TOP 1 cik, ticker, title FROM companies WHERE ticker = '%s'", inputcomp.Ticker)
@@ -107,7 +107,7 @@ func readCompany(inputcomp company, db *sql.DB) (company, error) {
 	returncomp := company{}
 
 	if rows.Next() {
-		err := rows.Scan(&returncomp.cik, &returncomp.Ticker, &returncomp.Title)
+		err := rows.Scan(&returncomp.Cik, &returncomp.Ticker, &returncomp.Title)
 		if err != nil {
 			return company{}, err
 		}
@@ -168,7 +168,7 @@ rns WHERE num_duplicate = 1 %s ORDER BY date DESC`, factParam.dateParam.Ticker, 
 	facts := []condensedFacts{}
 	fact := condensedFacts{}
 	for rows.Next() {
-		err := rows.Scan(&fact.tag, &fact.date, &fact.value, &fact.qtrs)
+		err := rows.Scan(&fact.Tag, &fact.Date, &fact.Value, &fact.Qtrs)
 		if err != nil {
 			return nil, err
 		}

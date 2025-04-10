@@ -70,7 +70,7 @@ type stockPrice struct {
 }
 
 type company struct {
-	cik    int64  `json:"cik"`
+	Cik    int64  `json:"cik"`
 	Ticker string `json:"ticker"`
 	Title  string `json:"title"`
 }
@@ -82,10 +82,17 @@ type QueryParamDate struct {
 }
 
 type condensedFacts struct {
-	tag   string
-	date  string
-	value float64
-	qtrs  int8
+	Tag   string  `json:"tag"`
+	Date  string  `json:"date"`
+	Value float64 `json:"value"`
+	Qtrs  int8    `json:"qtrs"`
+}
+
+type articleInfo struct {
+	PublisherName string `json:"publisher_name"`
+	Title         string `json:"title"`
+	Author        string `json:"author"`
+	ArticleURL    string `json:"article_url"`
 }
 
 type factFilingParam struct {
@@ -96,4 +103,10 @@ type factFilingParam struct {
 
 func (q QueryParamDate) getTicker() string {
 	return q.Ticker
+}
+
+type basePageResponse struct {
+	Facts       []condensedFacts `json:"facts"`
+	Articles    []articleInfo    `json:"articles"`
+	StockPrices []stockPrice     `json:"stock_prices"`
 }

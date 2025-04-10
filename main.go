@@ -1,27 +1,23 @@
 package main
 
 import (
+	"github.com/gorilla/mux"
 	"log"
+	"net/http"
 )
 
 func main() {
 
 	db, err := CreateConn()
-
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
 
-	queryparam := factFilingParam{
-		dateParam: QueryParamDate{},
-		tag:       "GrossProfit",
-		yearly:    true,
-	}
-	condFacts, err := getFactData(queryparam, db)
-	if err != nil {
-		log.Fatal(err)
-	}
-	printFactData(condFacts)
+	apphandler := &AppHandler{db: db}
+
+	Router := mux.NewRouter().StrictSlash(true)
+	Router.HandleFunc("/query/test", apphandler.FactDataTest).Methods("GET")
+	log.Fatal(http.ListenAndServe(":8080", Router))
 
 }
