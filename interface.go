@@ -58,6 +58,15 @@ var validTags = map[string]bool{
 	"ShortTermInvestments": true,
 }
 
+const (
+	Asc      SortOrder = "asc"
+	Desc     SortOrder = "desc"
+	sortDate dateSort  = "published_utc"
+)
+
+type dateSort string
+type SortOrder string
+
 type stockPrice struct {
 	Ticker       string  `json:"ticker"`
 	Date         string  `json:"date"`
@@ -76,9 +85,9 @@ type company struct {
 }
 
 type QueryParamDate struct {
-	Ticker     string `json:"ticker"`
-	End_date   string `json:"end_date"`
-	Start_date string `json:"start_date"`
+	Ticker     string  `json:"ticker"`
+	End_date   *string `json:"end_date"`
+	Start_date *string `json:"start_date"`
 }
 
 type condensedFacts struct {
@@ -95,14 +104,23 @@ type articleInfo struct {
 	ArticleURL    string `json:"article_url"`
 }
 
-type factFilingParam struct {
-	dateParam QueryParamDate
-	tag       string
-	yearly    bool
+type newsInputParam struct {
+	Ticker string     `json:"ticker" validate:"required"`
+	Limit  int        `json:"limit" validate:"required"`
+	Order  *SortOrder `json:"order"`
+	Sort   *dateSort  `json:"sort"`
 }
 
-func (q QueryParamDate) getTicker() string {
-	return q.Ticker
+type factFilingParam struct {
+	DateParam QueryParamDate `json:"date_param"`
+	Tag       string         `json:"tag"`
+	Yearly    bool           `json:"yearly"`
+}
+
+type basePageBody struct {
+	FilingParam factFilingParam `json:"filing_param" validate:"required"`
+	NewsParam   newsInputParam  `json:"news_param" validate:"required"`
+	StockParam  QueryParamDate  `json:"stock_param" validate:"required"`
 }
 
 type basePageResponse struct {
